@@ -1060,10 +1060,40 @@ program
   .description('Start CodeGraph as an MCP server for AI assistants')
   .option('-p, --path <path>', 'Project path (optional for MCP mode, uses rootUri from client)')
   .option('--mcp', 'Run as MCP server (stdio transport)')
-  .action(async (options: { path?: string; mcp?: boolean }) => {
+  .option('--web', 'Start HTTP API server for web visualization')
+  .option('--port <port>', 'Port for the HTTP API server', '3000')
+  .option('--host <host>', 'Host to bind the HTTP API server', '0.0.0.0')
+  .action(async (options: { path?: string; mcp?: boolean; web?: boolean; port?: string; host?: string }) => {
     const projectPath = options.path ? resolveProjectPath(options.path) : undefined;
 
     try {
+      // If --web is specified, start the HTTP API server
+      if (options.web) {
+        const { startWebServer } = await import('../server/index');
+        const port = parseInt(options.port || '3000', 10);
+        const host = options.host || '0.0.0.0';
+
+        // Check for built frontend in dist/web
+        const fs = await import('fs');
+        const staticDir = path.join(__dirname, '..', '..', 'dist', 'web');
+        const hasFrontend = fs.existsSync(staticDir) && fs.existsSync(path.join(staticDir, 'index.html'));
+
+        await startWebServer({
+          port,
+          host,
+          projectPath,
+          staticDir: hasFrontend ? staticDir : undefined,
+        });
+
+        // If --mcp is also specified, start MCP in parallel
+        if (options.mcp) {
+          const { MCPServer } = await import('../mcp/index');
+          const server = new MCPServer(projectPath);
+          await server.start();
+        }
+        return;
+      }
+
       if (options.mcp) {
         // Start MCP server - it handles initialization lazily based on rootUri from client
         const { MCPServer } = await import('../mcp/index');
@@ -1075,6 +1105,7 @@ program
         // Use stderr so stdout stays clean for any piped/stdio usage.
         console.error(chalk.bold('\nCodeGraph MCP Server\n'));
         console.error(chalk.blue('ℹ') + ' Use --mcp flag to start the MCP server');
+        console.error(chalk.blue('ℹ') + ' Use --web flag to start the web visualization server');
         console.error('\nTo use with Claude Code, add to your MCP configuration:');
         console.error(chalk.dim(`
 {
@@ -1086,6 +1117,8 @@ program
   }
 }
 `));
+        console.error('\nTo start the web visualization:');
+        console.error(chalk.dim(`  codegraph serve --web\n`));
         console.error('Available tools:');
         console.error(chalk.cyan('  codegraph_search') + '    - Search for code symbols');
         console.error(chalk.cyan('  codegraph_context') + '   - Build context for a task');

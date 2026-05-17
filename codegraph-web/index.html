@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeGraph - Code Relationship Visualization</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="header">
+      <div class="header-left">
+        <h1>CodeGraph</h1>
+        <span id="stats-badge" class="badge">Loading...</span>
+      </div>
+      <div class="header-right">
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Search symbols..." autocomplete="off" />
+          <div id="search-results" class="search-results"></div>
+        </div>
+        <select id="view-mode">
+          <option value="all">Overview</option>
+          <option value="files">File Dependencies</option>
+          <option value="search">Search Result</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <div id="main">
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <div class="sidebar-section">
+          <h3>Filters</h3>
+          <div class="filter-group">
+            <label>Node Kinds</label>
+            <div id="node-kind-filters" class="filter-checkboxes"></div>
+          </div>
+          <div class="filter-group">
+            <label>Edge Kinds</label>
+            <div id="edge-kind-filters" class="filter-checkboxes"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Layout</h3>
+          <select id="layout-select">
+            <option value="cose">Force Directed (CoSE)</option>
+            <option value="dagre">Hierarchical (Dagre)</option>
+            <option value="concentric">Concentric</option>
+            <option value="circle">Circle</option>
+            <option value="grid">Grid</option>
+          </select>
+          <button id="layout-btn">Apply Layout</button>
+        </div>
+
+        <div class="sidebar-section" id="node-detail" style="display:none">
+          <h3>Node Details</h3>
+          <div id="node-detail-content"></div>
+        </div>
+
+        <div class="sidebar-section" id="context-panel" style="display:none">
+          <h3>Context</h3>
+          <div id="context-content"></div>
+        </div>
+      </aside>
+
+      <!-- Graph canvas -->
+      <div id="cy-container">
+        <div id="cy"></div>
+        <div id="graph-info" class="graph-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

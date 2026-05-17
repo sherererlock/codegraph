@@ -80,6 +80,8 @@ export {
 export { Mutex, FileLock, processInBatches, debounce, throttle, MemoryMonitor } from './utils';
 export { FileWatcher, WatchOptions } from './sync';
 export { MCPServer } from './mcp';
+export { createWebServer, startWebServer } from './server/index';
+export type { WebServerOptions } from './server/index';
 
 /**
  * Options for initializing a new CodeGraph project
@@ -887,6 +889,20 @@ export class CodeGraph {
     depth: number;
   } {
     return this.graphManager.getNodeMetrics(nodeId);
+  }
+
+  /**
+   * Get a filtered subgraph containing nodes matching a filter
+   *
+   * @param filter - Function to select which nodes to include
+   * @param includeEdges - Whether to include edges between matching nodes (default: true)
+   * @returns Subgraph containing matching nodes and their edges
+   */
+  getFilteredSubgraph(
+    filter: (node: Node) => boolean,
+    includeEdges: boolean = true
+  ): Subgraph {
+    return this.graphManager.getFilteredSubgraph(filter, includeEdges);
   }
 
   // ===========================================================================
